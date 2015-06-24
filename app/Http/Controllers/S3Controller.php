@@ -3,6 +3,7 @@
 use DateTime;
 use League\Flysystem\Filesystem;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class S3Controller extends Controller
 {
@@ -15,17 +16,22 @@ class S3Controller extends Controller
 
     public function getResource(Request $request, $path)
     {
+        // Get date metadata and calculate ETag
+        $timestamp   = $this->fs->getTimestamp($path);
+        $ETag        = md5($path . $timestamp);
+        $date        = new DateTime("@$timestamp");
+
+        $response = new Response();
+        $response->setLastModified($date)->setEtag($ETag, true)->setPublic();
+
+        // Check modified date and Etag before attempting to retrieve actual content
+        if ($response->isNotModified($request)) {
+            return $response;
+        }
+
         $content     = $this->fs->read($path);
         $contentType = $this->fs->getMimetype($path);
-        $timestamp   = $this->fs->getTimestamp($path);
 
-        $ETag = md5($path . $timestamp);
-        $date = new DateTime("@$timestamp");
-
-        return response($content)
-            ->header('Content-Type', $contentType)
-            ->setLastModified($date)
-            ->setEtag($ETag, true)
-            ->setPublic();
+        return $response->header('Content-Type', $contentType)->setContent($content);
     }
 }

@@ -2,6 +2,7 @@
 
 use Aws\S3\Exception\S3Exception;
 use Closure;
+use DateTime;
 use Illuminate\Http\Response;
 use Laravel\Lumen\Application;
 use League\Flysystem\Filesystem;
@@ -16,7 +17,7 @@ class S3Middleware
     }
 
     /**
-     * Handle an incoming request.
+     * Return 404s for missing files and redirect to index.html for directories
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
@@ -59,21 +60,7 @@ class S3Middleware
             return redirect($path, 301);
         }
 
-        // Calculate ETag for caching
-        $ETag = md5($path . $this->fs->getTimestamp($path));
-        $rawETags = $request->getEtags();
-
-        // Return 304 (Not Modified) if requested ETag matches for current file
-        if (isset($rawETags[0])) {
-            // Handle "weak" ETags
-            $reqestETag = preg_replace('/^(?:W\/)?"([[:xdigit:]]{32})"/', '$1', $rawETags[0]);
-
-            if ($ETag == $reqestETag) {
-                return response(null)->setNotModified();
-            }
-        }
-
+        // Forward to Controller for content & modified time
         return $next($request);
     }
-
 }
