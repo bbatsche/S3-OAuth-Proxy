@@ -1,7 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 use DateTime;
-use League\Flysystem\Filesystem;
+use GrahamCampbell\Flysystem\FlysystemManager as Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 

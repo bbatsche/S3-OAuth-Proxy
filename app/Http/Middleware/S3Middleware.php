@@ -2,10 +2,7 @@
 
 use Aws\S3\Exception\S3Exception;
 use Closure;
-use DateTime;
-use Illuminate\Http\Response;
-use Laravel\Lumen\Application;
-use League\Flysystem\Filesystem;
+use GrahamCampbell\Flysystem\FlysystemManager as Filesystem;
 
 class S3Middleware
 {
@@ -28,7 +25,7 @@ class S3Middleware
         // File path requested
         $path = $request->decodedPath();
 
-        // Remove any extra slashes
+        // Remove any repeated slashes
         $path = preg_replace('#//+#', '/', $path);
 
         // If user requested / explicitly redirect them to index.html
