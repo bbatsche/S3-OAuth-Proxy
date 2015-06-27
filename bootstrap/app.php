@@ -24,6 +24,7 @@ $app = new Laravel\Lumen\Application(
 $app->withEloquent();
 
 $app->configure('services');
+$app->configure('flysystem');
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +84,7 @@ $app->routeMiddleware([
 
 $app->register(App\Providers\S3ServiceProvider::class);
 $app->register(Laravel\Socialite\SocialiteServiceProvider::class);
+$app->register(GrahamCampbell\Flysystem\FlysystemServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
