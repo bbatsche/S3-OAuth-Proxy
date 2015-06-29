@@ -82,7 +82,6 @@ $app->routeMiddleware([
 |
 */
 
-$app->register(App\Providers\S3ServiceProvider::class);
 $app->register(Laravel\Socialite\SocialiteServiceProvider::class);
 $app->register(GrahamCampbell\Flysystem\FlysystemServiceProvider::class);
 
