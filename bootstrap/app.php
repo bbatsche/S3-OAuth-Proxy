@@ -85,6 +85,11 @@ $app->routeMiddleware([
 $app->register(Laravel\Socialite\SocialiteServiceProvider::class);
 $app->register(GrahamCampbell\Flysystem\FlysystemServiceProvider::class);
 
+// Tinker is optional DEV requirement
+if(class_exists('Vluzrmos\Tinker\TinkerServiceProvider')) {
+    $app->register(Vluzrmos\Tinker\TinkerServiceProvider::class);
+}
+
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
