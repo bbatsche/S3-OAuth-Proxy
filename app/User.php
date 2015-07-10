@@ -24,4 +24,9 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
      * @var array
      */
     protected $hidden = ['remember_token'];
+
+    public function cohort()
+    {
+        return $this->belongsTo('App\Cohort');
+    }
 }
