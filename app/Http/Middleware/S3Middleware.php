@@ -34,18 +34,8 @@ class S3Middleware
         }
 
         // Handle requests for missing files
-        try {
-            if (!$this->fs->has($path)) {
-                abort(404);
-            }
-        } catch (S3Exception $e) {
-            // AwsS3Adapter::has() should NOT throw this exception, but it does.
-            // See https://github.com/thephpleague/flysystem-aws-s3-v3/issues/29
-            if ($e->getResponse()->getStatusCode() == 403) {
-                abort(404);
-            }
-
-            throw $e;
+        if (!$this->fs->has($path)) {
+            abort(404);
         }
 
         // If request is for directory, redirect to index.html in that directory
