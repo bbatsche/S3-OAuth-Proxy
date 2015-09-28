@@ -11,8 +11,9 @@
 |
 */
 
-$app->get('login', 'AuthController@getLogin');
-$app->get('github',  'AuthController@getGithub');
+$app->get('login',  'AuthController@getLogin');
+$app->get('github', 'AuthController@getGithub');
+$app->get('logout', 'AuthController@getLogout');
 
 $app->group(['middleware' => ['auth', 's3'], 'namespace' => 'App\Http\Controllers'], function($app) {
     $app->get('/', 'S3Controller@getResource');

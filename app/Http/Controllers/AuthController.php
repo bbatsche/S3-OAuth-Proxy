@@ -19,6 +19,15 @@ class AuthController extends Controller
         return $this->github->redirect();
     }
 
+    public function getLogout()
+    {
+        $auth = app('auth');
+
+        $auth->logout();
+
+        return redirect('http://codeup.com');
+    }
+
     public function getGithub(Request $request)
     {
         if (!$request->has('code')) {
