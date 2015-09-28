@@ -14,8 +14,10 @@ class AuthController extends Controller
         $this->github = $social->driver('github');
     }
 
-    public function getLogin()
+    public function getLogin(Request $request)
     {
+        $request->session()->reflash();
+
         return $this->github->redirect();
     }
 
@@ -56,6 +58,6 @@ class AuthController extends Controller
 
         $auth->login($user, true);
 
-        return redirect('index.html');
+        return redirect($request->session()->get('intended_url', 'index.html'));
     }
 }

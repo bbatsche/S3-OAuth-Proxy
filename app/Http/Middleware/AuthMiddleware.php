@@ -36,6 +36,7 @@ class AuthMiddleware
             if ($request->ajax()) {
                 return response('Unauthorized.', 401);
             } else {
+                $request->session()->flash('intended_url', $request->path());
                 return redirect('login');
             }
         }
