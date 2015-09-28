@@ -3,14 +3,17 @@
 use Aws\S3\Exception\S3Exception;
 use Closure;
 use GrahamCampbell\Flysystem\FlysystemManager as Filesystem;
+use Psr\Log\LoggerInterface as Log;
 
 class S3Middleware
 {
     protected $fs;
+    protected $logger;
 
-    public function __construct(Filesystem $fs)
+    public function __construct(Filesystem $fs, Log $logger)
     {
-        $this->fs  = $fs;
+        $this->fs     = $fs;
+        $this->logger = $logger;
     }
 
     /**
@@ -35,6 +38,8 @@ class S3Middleware
 
         // Handle requests for missing files
         if (!$this->fs->has($path)) {
+            $this->logger->warning('File not found (cache miss)', array('path' => $path));
+
             abort(404);
         }
 

@@ -4,6 +4,7 @@ use DateTime;
 use GrahamCampbell\Flysystem\FlysystemManager as Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Psr\Log\LoggerInterface as Log;
 
 class S3Controller extends Controller
 {
@@ -14,12 +15,12 @@ class S3Controller extends Controller
         $this->fs = $fs;
     }
 
-    public function getResource(Request $request, $path)
+    public function getResource(Request $request, Log $logger, $path)
     {
         // Get date metadata and calculate ETag
-        $timestamp   = $this->fs->getTimestamp($path);
-        $ETag        = md5($path . $timestamp);
-        $date        = new DateTime("@$timestamp");
+        $timestamp = $this->fs->getTimestamp($path);
+        $ETag      = md5($path . $timestamp);
+        $date      = new DateTime("@$timestamp");
 
         $response = new Response();
         $response->setLastModified($date)->setEtag($ETag, true)->setPublic();
@@ -34,6 +35,8 @@ class S3Controller extends Controller
         if (!$content) {
             // We had a false positive from the cache!!
             $this->deleteFromCache($path);
+
+            $logger->warning('File not found (cache false positive)', array('path' => $path));
 
             abort(404);
         }

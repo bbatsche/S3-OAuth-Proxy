@@ -1,15 +1,17 @@
 <?php namespace App\Http\Controllers;
 
 use App\User;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\Auth\Guard as Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Laravel\Socialite\Contracts\Factory;
+use Illuminate\Http\Request;
+use Laravel\Socialite\Contracts\Factory as Socialite;
+use Psr\Log\LoggerInterface as Log;
 
 class AuthController extends Controller
 {
     protected $github;
 
-    public function __construct(Factory $social)
+    public function __construct(Socialite $social)
     {
         $this->github = $social->driver('github');
     }
@@ -21,16 +23,14 @@ class AuthController extends Controller
         return $this->github->redirect();
     }
 
-    public function getLogout()
+    public function getLogout(Auth $auth)
     {
-        $auth = app('auth');
-
         $auth->logout();
 
         return redirect('http://codeup.com');
     }
 
-    public function getGithub(Request $request)
+    public function getGithub(Request $request, Auth $auth, Log $logger)
     {
         if (!$request->has('code')) {
             return redirect('login');
@@ -43,7 +43,15 @@ class AuthController extends Controller
                 ->orWhere('github_username', $ghUser->getNickname())
                 ->firstOrFail();
         } catch (ModelNotFoundException $e) {
-            abort(403);
+            $logInfo = array(
+                'id'       => $ghUser->getId(),
+                'username' => $ghUser->getNickname(),
+                'email'    => $ghUser->getEmail()
+            );
+
+            $logger->warning('GitHub authentication failed: no user found!', $logInfo);
+
+            abort(401);
         }
 
         $user->github_id       = $ghUser->getId();
@@ -53,8 +61,6 @@ class AuthController extends Controller
         $user->github_icon     = $ghUser->getAvatar();
 
         $user->save();
-
-        $auth = app('auth');
 
         $auth->login($user, true);
 
