@@ -5,6 +5,7 @@ use GrahamCampbell\Flysystem\FlysystemManager as Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Psr\Log\LoggerInterface as Log;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag as HeaderBag;
 
 class S3Controller extends Controller
 {
@@ -42,6 +43,14 @@ class S3Controller extends Controller
         }
 
         $contentType = $this->fs->getMimetype($path);
+
+        if (env('EXAMPLE_DIR') && starts_with($path, env('EXAMPLE_DIR'))) {
+            // Path is within our "examples" directory, force the file to be downloaded
+
+            $disposition = $response->headers->makeDisposition(HeaderBag::DISPOSITION_ATTACHMENT, basename($path));
+
+            $response->header('Content-Disposition', $disposition);
+        }
 
         return $response->header('Content-Type', $contentType)->setContent($content);
     }
